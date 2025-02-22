@@ -35,7 +35,7 @@ func extractCodeBlocks(md string) []CodeBlock {
 				var contentBuilder strings.Builder
 				if codeBlock.Lines().Len() > 0 {
 					startLine := codeBlock.Lines().At(0).Start + 1
-					endLine := codeBlock.Lines().At(codeBlock.Lines().Len() - 1).Stop + 1
+					endLine := codeBlock.Lines().At(codeBlock.Lines().Len()-1).Stop + 1
 
 					for i := 0; i < codeBlock.Lines().Len(); i++ {
 						line := codeBlock.Lines().At(i)
@@ -90,6 +90,8 @@ func executeBlock(block CodeBlock) {
 		shell = "fish"
 	case "nushell", "nu":
 		shell = "nu"
+	case "zsh":
+		shell = "zsh"
 	default:
 		fmt.Println("Unsupported language:", block.Language)
 		return
