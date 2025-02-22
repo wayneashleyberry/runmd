@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/yuin/goldmark"
@@ -69,16 +70,30 @@ func presentChoices(blocks []CodeBlock, sourceName string) int {
 		fmt.Printf("[%d] %s:%d:%d (%s)\n%s\n\n", i+1, sourceName, block.StartLine, block.EndLine, block.Language, preview)
 	}
 
-	var choice int
+	// Open /dev/tty to read from the terminal
+	tty, err := os.Open("/dev/tty")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening terminal: %v\n", err)
+		os.Exit(1)
+	}
+	defer tty.Close()
+
+	reader := bufio.NewReader(tty)
+
 	for {
 		fmt.Print("Enter the number of the code block: ")
-		_, err := fmt.Scan(&choice)
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading input: %v\n", err)
+			continue
+		}
+		input = strings.TrimSpace(input)
+		choice, err := strconv.Atoi(input)
 		if err == nil && choice > 0 && choice <= len(blocks) {
-			break
+			return choice - 1
 		}
 		fmt.Println("Invalid selection, try again.")
 	}
-	return choice - 1
 }
 
 func executeBlock(block CodeBlock) {
